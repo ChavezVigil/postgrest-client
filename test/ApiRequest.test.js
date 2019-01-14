@@ -3,21 +3,25 @@ import ApiRequest from '../lib/ApiRequest'
 
 describe('ApiRequest', () => {
   it('will only ever accept json', () => {
-    const { req } = new ApiRequest('GET', '/')
-    assert.equal(req._headers.accept, 'application/json')
+    const { headers } = new ApiRequest('GET', '/').toJSON();
+    assert.equal(headers.accept, 'application/json');
   })
 
   it('will authorize in auth() using a token', () => {
-    const { req } = new ApiRequest('GET', '/').auth('token')
-    assert.equal(req._headers.authorization, 'Bearer token')
+    const { headers } = new ApiRequest('GET', '/')
+      .auth('token')
+      .toJSON();
+    assert.equal(headers.authorization, 'Bearer token');
   })
 
   it('will authorize in auth() using a basic auth object', () => {
-    const user = 'user'
-    const pass = 'pass'
-    const authHeader = new Buffer(`${user}:${pass}`).toString('base64')
-    const { req } = new ApiRequest('GET', '/').auth({ user, pass })
-    assert.equal(req._headers.authorization, `Basic ${authHeader}`)
+    const user = 'user';
+    const pass = 'pass';
+    const authHeader = new Buffer(`${user}:${pass}`).toString('base64');
+    const { headers } = new ApiRequest('GET', '/')
+      .auth({ user, pass })
+      .toJSON();
+    assert.equal(headers.authorization, `Basic ${authHeader}`)
   })
 
   it('will translate match() key/values to filter', () => {
