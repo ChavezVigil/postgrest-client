@@ -1,7 +1,7 @@
 'use strict'
 
 const webpack = require('webpack')
-const compact = require('lodash/array/compact')
+const compact = require('lodash').compact
 
 const optimize = webpack.optimize
 
