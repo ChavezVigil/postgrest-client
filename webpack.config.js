@@ -1,35 +1,44 @@
-'use strict'
-
-const webpack = require('webpack')
-const compact = require('lodash').compact
-
-const optimize = webpack.optimize
-
-const minify = process.env.MINIFY === 'true'
-
-const banner = [
-  'PostgREST Client',
-  '(c) 2016 Caleb Meredith',
-  'Released under the MIT License.'
-].join('\n')
+var path = require('path');
+var CleanWebpackPlugin = require('clean-webpack-plugin');
+var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
-  entry: './index.js',
-  output: {
-    path: './dist',
-    filename: minify ? 'postgrest-client.min.js' : 'postgrest-client.js',
-    library: 'PostgREST',
-    libraryTarget: 'var'
+  entry: {
+    'postgrest-client': './lib/index.js',
+    'postgrest-client.min': './lib/index.js',
   },
-  target: 'web',
-  bail: true,
-  plugins: compact([
-    new webpack.BannerPlugin(banner),
-    new optimize.DedupePlugin(),
-    minify ?
-    new optimize.UglifyJsPlugin({
-      mangle: true,
-      comments: /PostgREST Client/
-    }) : null
-  ])
-}
+  mode: 'production',
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+    library: 'postgrestClient',
+    globalObject: 'this',
+    libraryTarget: 'umd',
+  },
+  externals: [
+    'superagent',
+  ],
+  module: {
+    rules: [
+      {
+        test: /\.(js)$/,
+        exclude: /(node_modules)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env']
+          }
+        }
+      }
+    ]
+  },
+  optimization: {
+    minimize: true,
+    minimizer: [new UglifyJsPlugin({
+      include: /\.min\.js$/
+    })]
+  },
+  plugins: [
+    new CleanWebpackPlugin(['dist']),
+  ]
+};
